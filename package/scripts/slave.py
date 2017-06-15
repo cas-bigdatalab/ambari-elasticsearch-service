@@ -22,7 +22,7 @@ def slave():
     Directory(directories,
               owner=params.elastic_user,
               group=params.elastic_user,
-              recursive=True
+              create_parents=True
           )
     
     File(format("{conf_dir}/elastic-env.sh"),

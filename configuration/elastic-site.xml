@@ -7,6 +7,7 @@
     <property>
         <name>cluster_name</name>
         <description>Cluster name identifies your cluster</description>
+		<value>es_cluster</value>
     </property>
     <property>
         <name>seed_node1</name>

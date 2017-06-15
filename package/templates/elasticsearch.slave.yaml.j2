@@ -57,9 +57,9 @@ threadpool:
   index:
     queue_size: {{threadpool_index_queue_size}}
 
-discovery.zen.ping_timeout: {{discovery_zen_ping_timeout}}s
-discovery.zen.fd.ping_interval: {{discovery_zen_fd_ping_interval}}s
-discovery.zen.fd.ping_timeout: {{discovery_zen_fd_ping_timeout}}s
+discovery.zen.ping_timeout: {{discovery_zen_ping_timeout}}
+discovery.zen.fd.ping_interval: {{discovery_zen_fd_ping_interval}}
+discovery.zen.fd.ping_timeout: {{discovery_zen_fd_ping_timeout}}
 discovery.zen.fd.ping_retries: {{discovery_zen_fd_ping_retries}}
 
-network.host: _{{network_host}}_
+network.host: {{hostname}}

@@ -25,20 +25,20 @@ class Elasticsearch(Script):
     def stop(self, env):
         import params
         env.set_params(params)
-        stop_cmd = format("service elasticsearch stop")
+        stop_cmd = format("systemctl stop elasticsearch.service")
         Execute(stop_cmd)
         print 'Stop the Slave'
     def start(self, env):
         import params
         env.set_params(params)
         self.configure(env)
-        start_cmd = format("service elasticsearch start")
+        start_cmd = format("systemctl start elasticsearch.service")
         Execute(start_cmd)
         print 'Start the Slave'
     def status(self, env):
         import params
         env.set_params(params)
-        status_cmd = format("service elasticsearch status")
+        status_cmd = format("systemctl status elasticsearch.service")
         Execute(status_cmd)
         print 'Status of the Slave'
 if __name__ == "__main__":
