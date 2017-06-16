@@ -9,6 +9,11 @@
         <description>Cluster name identifies your cluster</description>
 		<value>es</value>
     </property>
+	<property>
+    <name>es_heap_size</name>
+    <value>1g</value>
+    <description>es_heap_size</description>
+    </property>
     <property>
         <name>seed_node1</name>
         <value></value>

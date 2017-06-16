@@ -58,3 +58,4 @@ discovery_zen_fd_ping_timeout = config['configurations']['elastic-site']['discov
 discovery_zen_fd_ping_retries = config['configurations']['elastic-site']['discovery_zen_fd_ping_retries']
 
 network_host = config['configurations']['elastic-site']['network_host']
+es_heap_size = config['configurations']['elastic-site']['es_heap_size']
