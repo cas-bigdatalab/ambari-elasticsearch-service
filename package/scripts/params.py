@@ -1,61 +1,95 @@
 #!/usr/bin/env python
+
 """
-Elasticsearch Params configurations
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from resource_management import *
-import status_params
+import os
 
-# server configurations
+# config object that holds the configurations declared in the -config.xml file
 config = Script.get_config()
 
-elastic_home = '/etc/elasticsearch/'
-elastic_bin = '/usr/share/elasticsearch/bin/'
 
-conf_dir = "/etc/elasticsearch"
-elastic_user = config['configurations']['elastic-env']['elastic_user']
-user_group = config['configurations']['elastic-env']['user_group']
-log_dir = config['configurations']['elastic-env']['elastic_log_dir']
-pid_dir = '/var/run/elasticsearch'
-pid_file = '/var/run/elasticsearch/elasticsearch.pid'
-hostname = config['hostname']
-java64_home = config['hostLevelParams']['java_home']
+
 elastic_env_sh_template = config['configurations']['elastic-env']['content']
 
-cluster_name = config['configurations']['elastic-site']['cluster_name']
-seed_node1 = config['configurations']['elastic-site']['seed_node1']
-seed_node2 = config['configurations']['elastic-site']['seed_node2']
-seed_node3 = config['configurations']['elastic-site']['seed_node3']
+hostname = config['hostname']
 
-path_data = config['configurations']['elastic-site']['path_data']
-http_port = config['configurations']['elastic-site']['http_port']
-transport_tcp_port = config['configurations']['elastic-site']['transport_tcp_port']
+# kinit_path_local = get_kinit_path(default('/configurations/kerberos-env/executable_search_paths', None))
 
-recover_after_time = config['configurations']['elastic-site']['recover_after_time']
-recover_after_data_nodes = config['configurations']['elastic-site']['recover_after_data_nodes']
-expected_data_nodes = config['configurations']['elastic-site']['expected_data_nodes']
-discovery_zen_ping_multicast_enabled = config['configurations']['elastic-site']['discovery_zen_ping_multicast_enabled']
-index_merge_scheduler_max_thread_count = config['configurations']['elastic-site']['index_merge_scheduler_max_thread_count']
-index_translog_flush_threshold_size = config['configurations']['elastic-site']['index_translog_flush_threshold_size']
-index_refresh_interval = config['configurations']['elastic-site']['index_refresh_interval']
-index_store_throttle_type = config['configurations']['elastic-site']['index_store_throttle_type']
-index_number_of_shards = config['configurations']['elastic-site']['index_number_of_shards']
-index_number_of_replicas = config['configurations']['elastic-site']['index_number_of_replicas']
-index_buffer_size = config['configurations']['elastic-site']['index_buffer_size']
-mlockall = config['configurations']['elastic-site']['mlockall']
-threadpool_bulk_queue_size = config['configurations']['elastic-site']['threadpool_bulk_queue_size']
-cluster_routing_allocation_node_concurrent_recoveries = config['configurations']['elastic-site']['cluster_routing_allocation_node_concurrent_recoveries']
-cluster_routing_allocation_disk_watermark_low = config['configurations']['elastic-site']['cluster_routing_allocation_disk_watermark_low']
-cluster_routing_allocation_disk_threshold_enabled = config['configurations']['elastic-site']['cluster_routing_allocation_disk_threshold_enabled']
-cluster_routing_allocation_disk_watermark_high = config['configurations']['elastic-site']['cluster_routing_allocation_disk_watermark_high']
-indices_fielddata_cache_size = config['configurations']['elastic-site']['indices_fielddata_cache_size']
-indices_cluster_send_refresh_mapping = config['configurations']['elastic-site']['indices_cluster_send_refresh_mapping']
-threadpool_index_queue_size = config['configurations']['elastic-site']['threadpool_index_queue_size']
+# java_exec = format("{java64_home}/bin/java")
 
-discovery_zen_ping_timeout = config['configurations']['elastic-site']['discovery_zen_ping_timeout']
-discovery_zen_fd_ping_interval = config['configurations']['elastic-site']['discovery_zen_fd_ping_interval']
-discovery_zen_fd_ping_timeout = config['configurations']['elastic-site']['discovery_zen_fd_ping_timeout']
-discovery_zen_fd_ping_retries = config['configurations']['elastic-site']['discovery_zen_fd_ping_retries']
 
-network_host = config['configurations']['elastic-site']['network_host']
-es_heap_size = config['configurations']['elastic-site']['es_heap_size']
+java64_home = config['hostLevelParams']['java_home']
+service_packagedir = os.path.realpath(__file__).split('/scripts')[0]
+
+elastic_user = config['configurations']['elastic-env']['elastic_user']
+elastic_group = config['configurations']['elastic-env']['elastic_group']
+
+elastic_base_dir = config['configurations']['elastic-env']['elastic_base_dir']
+elastic_conf_dir = config['configurations']['elastic-env']['elastic_conf_dir']
+elastic_log_dir = config['configurations']['elastic-env']['elastic_log_dir']
+elastic_pid_dir = config['configurations']['elastic-env']['elastic_pid_dir']
+elastic_pid_file = format("{elastic_pid_dir}/elasticsearch.pid")
+
+elastic_install_log = elastic_base_dir + '/elasticsearch-install.log'
+elastic_download = 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.0.tar.gz'
+
+cluster_name = config['configurations']['elastic-config']['cluster_name']
+hostname = config['hostname']
+node_attr_rack = config['configurations']['elastic-config']['node_attr_rack']
+path_data = config['configurations']['elastic-config']['path_data']
+path_logs = config['configurations']['elastic-config']['path_logs']
+
+bootstrap_memory_lock = str(config['configurations']['elastic-config']['bootstrap_memory_lock'])
+
+# Elasticsearch expetcs that boolean values to be true or false and will generate an error if you use True or False.
+if bootstrap_memory_lock == 'True':
+    bootstrap_memory_lock = 'true'
+else:
+    bootstrap_memory_lock = 'false'
+
+network_host = config['configurations']['elastic-config']['network_host']
+http_port = config['configurations']['elastic-config']['http_port']
+
+discovery_zen_ping_unicast_hosts = str(config['configurations']['elastic-config']['discovery_zen_ping_unicast_hosts'])
+
+# Need to parse the comma separated hostnames to create the proper string format within the configuration file
+# Elasticsearch expects the format ["host1","host2"]
+master_node_list = discovery_zen_ping_unicast_hosts.split(',')
+discovery_zen_ping_unicast_hosts = '[' +  ','.join('"' + x + '"' for x in master_node_list) + ']'
+
+discovery_zen_minimum_master_nodes = config['configurations']['elastic-config']['discovery_zen_minimum_master_nodes']
+
+
+gateway_recover_after_nodes = config['configurations']['elastic-config']['gateway_recover_after_nodes']
+node_max_local_storage_nodes = config['configurations']['elastic-config']['node_max_local_storage_nodes']
+
+action_destructive_requires_name = str(config['configurations']['elastic-config']['action_destructive_requires_name'])
+
+# Elasticsearch expecgts boolean values to be true or false and will generate an error if you use True or False.
+if action_destructive_requires_name == 'True':
+    action_destructive_requires_name = 'true'
+else:
+    action_destructive_requires_name = 'false'
+
+xpack_security_enabled = str(config['configurations']['elastic-config']['xpack_security_enabled'])
+
+# Elasticsearch expects boolean values to be true or false and will generate an error if you use True or False.
+if xpack_security_enabled == 'True':
+    xpack_security_enabled = 'true'
+else:
+    xpack_security_enabled = 'false'
